@@ -15,6 +15,7 @@ project(cnn-accelerator
     DESCRIPTION "GPU-accelerated CNN inference engine with custom CUDA kernels"
 )
 
+
 # ============================================================================
 # Global Settings
 # ============================================================================
