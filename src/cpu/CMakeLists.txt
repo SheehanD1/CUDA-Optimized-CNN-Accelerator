@@ -11,7 +11,7 @@ add_library(cnn_cpu_layers STATIC)
 
 target_sources(cnn_cpu_layers
     PRIVATE
-        # Tensor implementation (Commit 7)
+        tensor.cpp
         # conv2d_cpu.cpp     (Commit 15)
         # relu_cpu.cpp       (Commit 19)
         # maxpool_cpu.cpp    (Commit 21)
@@ -19,7 +19,6 @@ target_sources(cnn_cpu_layers
         # softmax_cpu.cpp    (Commit 26)
         # inference_cpu.cpp  (Commit 30)
         # data_loader.cpp    (Commit 32)
-        ${CMAKE_CURRENT_SOURCE_DIR}/.gitkeep   # Placeholder until sources are added
 )
 
 target_include_directories(cnn_cpu_layers
