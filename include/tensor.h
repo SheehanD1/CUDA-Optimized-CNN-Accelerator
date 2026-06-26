@@ -58,6 +58,64 @@ public:
     int dim(int d) const;
 
     // ========================================================================
+    // Element access (indexing)
+    // ========================================================================
+
+    /// Access element by 4D NCHW indices (batch, channel, height, width).
+    /// This is the primary accessor for CNN tensor data.
+    /// Bounds-checked in debug builds via assert.
+    float& at(int n, int c, int h, int w) {
+        assert(ndim() == 4 && "at(n,c,h,w) requires a 4D tensor");
+        int idx = flat_index_4d(n, c, h, w);
+        return data_[static_cast<size_t>(idx)];
+    }
+
+    const float& at(int n, int c, int h, int w) const {
+        assert(ndim() == 4 && "at(n,c,h,w) requires a 4D tensor");
+        int idx = flat_index_4d(n, c, h, w);
+        return data_[static_cast<size_t>(idx)];
+    }
+
+    /// Access element by 2D indices (row, col) — for fully connected layers.
+    float& at(int r, int c) {
+        assert(ndim() == 2 && "at(r,c) requires a 2D tensor");
+        int idx = r * strides_[0] + c * strides_[1];
+        assert(idx >= 0 && idx < num_elements() && "Index out of bounds");
+        return data_[static_cast<size_t>(idx)];
+    }
+
+    const float& at(int r, int c) const {
+        assert(ndim() == 2 && "at(r,c) requires a 2D tensor");
+        int idx = r * strides_[0] + c * strides_[1];
+        assert(idx >= 0 && idx < num_elements() && "Index out of bounds");
+        return data_[static_cast<size_t>(idx)];
+    }
+
+    /// Access element by generic index vector.
+    /// Number of indices must match the tensor's number of dimensions.
+    float& at(const std::vector<int>& indices) {
+        int idx = flat_index(indices);
+        return data_[static_cast<size_t>(idx)];
+    }
+
+    const float& at(const std::vector<int>& indices) const {
+        int idx = flat_index(indices);
+        return data_[static_cast<size_t>(idx)];
+    }
+
+    /// Flat (linear) element access — no dimension checking.
+    /// Index must be in [0, num_elements()).
+    float& operator[](int i) {
+        assert(i >= 0 && i < num_elements() && "Flat index out of bounds");
+        return data_[static_cast<size_t>(i)];
+    }
+
+    const float& operator[](int i) const {
+        assert(i >= 0 && i < num_elements() && "Flat index out of bounds");
+        return data_[static_cast<size_t>(i)];
+    }
+
+    // ========================================================================
     // Shape
     // ========================================================================
 
@@ -70,6 +128,34 @@ public:
 
     /// Returns true if the tensor has no elements.
     bool empty() const { return data_.empty(); }
+
+    // ========================================================================
+    // NCHW convenience accessors (for 4D tensors)
+    // ========================================================================
+
+    /// Returns batch size (N) — first dimension of a 4D NCHW tensor.
+    int batch_size() const {
+        assert(ndim() == 4 && "batch_size() requires a 4D tensor");
+        return shape_[0];
+    }
+
+    /// Returns number of channels (C) — second dimension of a 4D NCHW tensor.
+    int channels() const {
+        assert(ndim() == 4 && "channels() requires a 4D tensor");
+        return shape_[1];
+    }
+
+    /// Returns height (H) — third dimension of a 4D NCHW tensor.
+    int height() const {
+        assert(ndim() == 4 && "height() requires a 4D tensor");
+        return shape_[2];
+    }
+
+    /// Returns width (W) — fourth dimension of a 4D NCHW tensor.
+    int width() const {
+        assert(ndim() == 4 && "width() requires a 4D tensor");
+        return shape_[3];
+    }
 
     // ========================================================================
     // Copy and move (defaulted — std::vector handles everything)
@@ -87,6 +173,30 @@ private:
 
     /// Compute strides from shape. Called during construction.
     void compute_strides();
+
+    /// Compute flat index from 4D NCHW indices.
+    /// Optimized hot path — used by all CNN layer computations.
+    int flat_index_4d(int n, int c, int h, int w) const {
+        assert(n >= 0 && n < shape_[0] && "Batch index out of bounds");
+        assert(c >= 0 && c < shape_[1] && "Channel index out of bounds");
+        assert(h >= 0 && h < shape_[2] && "Height index out of bounds");
+        assert(w >= 0 && w < shape_[3] && "Width index out of bounds");
+        return n * strides_[0] + c * strides_[1] + h * strides_[2] + w * strides_[3];
+    }
+
+    /// Compute flat index from generic index vector.
+    int flat_index(const std::vector<int>& indices) const {
+        assert(static_cast<int>(indices.size()) == ndim() &&
+               "Number of indices must match tensor dimensions");
+        int idx = 0;
+        for (int i = 0; i < ndim(); ++i) {
+            assert(indices[static_cast<size_t>(i)] >= 0 &&
+                   indices[static_cast<size_t>(i)] < shape_[static_cast<size_t>(i)] &&
+                   "Index out of bounds");
+            idx += indices[static_cast<size_t>(i)] * strides_[static_cast<size_t>(i)];
+        }
+        return idx;
+    }
 
     // ========================================================================
     // Data members
