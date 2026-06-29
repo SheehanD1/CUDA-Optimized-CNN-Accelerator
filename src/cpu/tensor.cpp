@@ -54,6 +54,66 @@ Tensor::Tensor(const std::vector<int>& shape, const std::vector<float>& data) : 
 }
 
 // ============================================================================
+// Static factory methods
+// ============================================================================
+
+Tensor Tensor::zeros(const std::vector<int>& shape) {
+    // Constructor already zero-initializes
+    return Tensor(shape);
+}
+
+Tensor Tensor::ones(const std::vector<int>& shape) {
+    Tensor t(shape);
+    t.fill(1.0f);
+    return t;
+}
+
+Tensor Tensor::full(const std::vector<int>& shape, float value) {
+    Tensor t(shape);
+    t.fill(value);
+    return t;
+}
+
+Tensor Tensor::rand(const std::vector<int>& shape, unsigned int seed) {
+    Tensor t(shape);
+
+    // Use random_device for non-deterministic seed if seed == 0
+    std::mt19937 gen;
+    if (seed != 0) {
+        gen.seed(seed);
+    } else {
+        std::random_device rd;
+        gen.seed(rd());
+    }
+
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    for (int i = 0; i < t.num_elements(); ++i) {
+        t[i] = dist(gen);
+    }
+    return t;
+}
+
+Tensor Tensor::randn(const std::vector<int>& shape, float mean, float stddev,
+                     unsigned int seed) {
+    Tensor t(shape);
+
+    // Use random_device for non-deterministic seed if seed == 0
+    std::mt19937 gen;
+    if (seed != 0) {
+        gen.seed(seed);
+    } else {
+        std::random_device rd;
+        gen.seed(rd());
+    }
+
+    std::normal_distribution<float> dist(mean, stddev);
+    for (int i = 0; i < t.num_elements(); ++i) {
+        t[i] = dist(gen);
+    }
+    return t;
+}
+
+// ============================================================================
 // Data access
 // ============================================================================
 

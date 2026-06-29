@@ -8,10 +8,12 @@
 // implementations and as the host-side representation for GPU transfers.
 // ============================================================================
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
 #include <numeric>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -38,6 +40,44 @@ public:
     /// Data is copied into internal storage. Size of data must match
     /// the product of shape dimensions.
     Tensor(const std::vector<int>& shape, const std::vector<float>& data);
+
+    // ========================================================================
+    // Static factory methods
+    // ========================================================================
+
+    /// Create a tensor filled with zeros.
+    /// Example: auto t = Tensor::zeros({1, 8, 28, 28});
+    static Tensor zeros(const std::vector<int>& shape);
+
+    /// Create a tensor filled with ones.
+    /// Example: auto t = Tensor::ones({8});
+    static Tensor ones(const std::vector<int>& shape);
+
+    /// Create a tensor filled with a constant value.
+    /// Example: auto t = Tensor::full({3, 3}, 0.5f);
+    static Tensor full(const std::vector<int>& shape, float value);
+
+    /// Create a tensor with uniform random values in [0, 1).
+    /// Uses a deterministic seed if provided (default: random_device).
+    /// Example: auto t = Tensor::rand({1, 1, 28, 28});
+    /// Example: auto t = Tensor::rand({1, 1, 28, 28}, 42);  // reproducible
+    static Tensor rand(const std::vector<int>& shape, unsigned int seed = 0);
+
+    /// Create a tensor with values from a normal distribution N(mean, stddev).
+    /// Useful for weight initialization.
+    /// Example: auto t = Tensor::randn({8, 1, 3, 3}, 0.0f, 0.1f);
+    static Tensor randn(const std::vector<int>& shape, float mean = 0.0f,
+                        float stddev = 1.0f, unsigned int seed = 0);
+
+    // ========================================================================
+    // In-place operations
+    // ========================================================================
+
+    /// Fill all elements with the given value.
+    void fill(float value) { std::fill(data_.begin(), data_.end(), value); }
+
+    /// Set all elements to zero.
+    void zero() { fill(0.0f); }
 
     // ========================================================================
     // Data access
