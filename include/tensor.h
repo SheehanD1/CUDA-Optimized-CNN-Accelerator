@@ -170,6 +170,30 @@ public:
     bool empty() const { return data_.empty(); }
 
     // ========================================================================
+    // Shape manipulation
+    // ========================================================================
+
+    /// Returns a new tensor with the same data but a different shape.
+    /// The total number of elements must remain unchanged.
+    /// Supports -1 for one dimension to auto-infer its size.
+    /// Example: Tensor({2, 3, 4}).reshape({6, 4})
+    /// Example: Tensor({2, 3, 4}).reshape({-1, 4})  → {6, 4}
+    Tensor reshape(const std::vector<int>& new_shape) const;
+
+    /// Returns a new tensor with the same data but shape {new_shape} via initializer list.
+    Tensor reshape(std::initializer_list<int> new_shape) const {
+        return reshape(std::vector<int>(new_shape));
+    }
+
+    /// Flatten to 2D: {batch_size, all_other_dims}.
+    /// For a tensor of shape {N, C, H, W}, returns shape {N, C*H*W}.
+    /// For a 1D tensor, returns shape {1, num_elements}.
+    Tensor flatten() const;
+
+    /// Flatten completely to 1D: {num_elements}.
+    Tensor flatten_all() const { return reshape({num_elements()}); }
+
+    // ========================================================================
     // NCHW convenience accessors (for 4D tensors)
     // ========================================================================
 

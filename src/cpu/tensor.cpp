@@ -133,6 +133,68 @@ int Tensor::dim(int d) const {
 }
 
 // ============================================================================
+// Shape manipulation
+// ============================================================================
+
+Tensor Tensor::reshape(const std::vector<int>& new_shape) const {
+    // Resolve -1 dimension (at most one allowed)
+    std::vector<int> resolved = new_shape;
+    int neg_one_idx = -1;
+    int known_product = 1;
+
+    for (int i = 0; i < static_cast<int>(resolved.size()); ++i) {
+        if (resolved[static_cast<size_t>(i)] == -1) {
+            if (neg_one_idx != -1) {
+                throw std::invalid_argument(
+                    "Tensor::reshape: at most one dimension can be -1");
+            }
+            neg_one_idx = i;
+        } else if (resolved[static_cast<size_t>(i)] <= 0) {
+            throw std::invalid_argument(
+                "Tensor::reshape: dimensions must be positive or -1, got " +
+                std::to_string(resolved[static_cast<size_t>(i)]));
+        } else {
+            known_product *= resolved[static_cast<size_t>(i)];
+        }
+    }
+
+    // Infer the -1 dimension
+    if (neg_one_idx != -1) {
+        if (known_product == 0 || num_elements() % known_product != 0) {
+            throw std::invalid_argument(
+                "Tensor::reshape: cannot infer dimension -1 for shape with " +
+                std::to_string(num_elements()) + " elements");
+        }
+        resolved[static_cast<size_t>(neg_one_idx)] = num_elements() / known_product;
+    }
+
+    // Validate total element count
+    int total = std::accumulate(resolved.begin(), resolved.end(), 1, std::multiplies<int>());
+    if (total != num_elements()) {
+        throw std::invalid_argument(
+            "Tensor::reshape: new shape has " + std::to_string(total) +
+            " elements, but tensor has " + std::to_string(num_elements()));
+    }
+
+    // Create new tensor with same data but different shape
+    // Data is copied (tensors don't share memory — simple ownership model)
+    return Tensor(resolved, std::vector<float>(data_.begin(), data_.end()));
+}
+
+Tensor Tensor::flatten() const {
+    if (ndim() <= 1) {
+        // 0D or 1D tensor → {1, num_elements}
+        return reshape({1, num_elements()});
+    }
+
+    // ND tensor → {dim(0), remaining_elements}
+    // For NCHW: {N, C*H*W}
+    int batch = shape_[0];
+    int features = num_elements() / batch;
+    return reshape({batch, features});
+}
+
+// ============================================================================
 // Internal helpers
 // ============================================================================
 
