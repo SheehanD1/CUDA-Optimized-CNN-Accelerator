@@ -12,8 +12,10 @@
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
+#include <iostream>
 #include <numeric>
 #include <random>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -220,6 +222,24 @@ public:
         assert(ndim() == 4 && "width() requires a 4D tensor");
         return shape_[3];
     }
+
+    // ========================================================================
+    // Debug and printing
+    // ========================================================================
+
+    /// Returns a human-readable string of the shape, e.g., "(1, 8, 28, 28)".
+    std::string shape_string() const;
+
+    /// Returns a string representation of the tensor (shape + data).
+    /// Large tensors are truncated to show first and last few elements.
+    /// max_elements: maximum number of elements to display before truncating.
+    std::string to_string(int max_elements = 20) const;
+
+    /// Print tensor to stdout (shape + data). Convenience wrapper.
+    void print(const std::string& name = "", int max_elements = 20) const;
+
+    /// Stream insertion operator for convenient logging.
+    friend std::ostream& operator<<(std::ostream& os, const Tensor& t);
 
     // ========================================================================
     // Copy and move (defaulted — std::vector handles everything)

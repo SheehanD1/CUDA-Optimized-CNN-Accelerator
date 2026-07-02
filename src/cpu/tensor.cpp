@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iomanip>
 #include <numeric>
 #include <stdexcept>
 
@@ -192,6 +193,76 @@ Tensor Tensor::flatten() const {
     int batch = shape_[0];
     int features = num_elements() / batch;
     return reshape({batch, features});
+}
+
+// ============================================================================
+// Debug and printing
+// ============================================================================
+
+std::string Tensor::shape_string() const {
+    std::ostringstream ss;
+    ss << "(";
+    for (int i = 0; i < ndim(); ++i) {
+        if (i > 0) ss << ", ";
+        ss << shape_[static_cast<size_t>(i)];
+    }
+    ss << ")";
+    return ss.str();
+}
+
+std::string Tensor::to_string(int max_elements) const {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(4);
+
+    // Header: shape and element count
+    ss << "Tensor" << shape_string();
+    ss << " [" << num_elements() << " elements, FP32]\n";
+
+    if (empty()) {
+        ss << "  (empty)";
+        return ss.str();
+    }
+
+    int n = num_elements();
+    int show = max_elements;
+
+    if (n <= show) {
+        // Show all elements
+        ss << "  [";
+        for (int i = 0; i < n; ++i) {
+            if (i > 0) ss << ", ";
+            ss << data_[static_cast<size_t>(i)];
+        }
+        ss << "]";
+    } else {
+        // Truncated: show first and last few elements
+        int half = show / 2;
+        ss << "  [";
+        for (int i = 0; i < half; ++i) {
+            if (i > 0) ss << ", ";
+            ss << data_[static_cast<size_t>(i)];
+        }
+        ss << ", ... , ";
+        for (int i = n - half; i < n; ++i) {
+            if (i > n - half) ss << ", ";
+            ss << data_[static_cast<size_t>(i)];
+        }
+        ss << "]";
+    }
+
+    return ss.str();
+}
+
+void Tensor::print(const std::string& name, int max_elements) const {
+    if (!name.empty()) {
+        std::cout << name << ": ";
+    }
+    std::cout << to_string(max_elements) << std::endl;
+}
+
+std::ostream& operator<<(std::ostream& os, const Tensor& t) {
+    os << t.to_string();
+    return os;
 }
 
 // ============================================================================
