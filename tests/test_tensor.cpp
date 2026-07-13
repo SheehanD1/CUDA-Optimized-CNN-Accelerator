@@ -311,3 +311,214 @@ TEST(TensorPrint, ToStringNoTruncation) {
     std::string s = t.to_string(10);
     EXPECT_EQ(s.find("..."), std::string::npos);
 }
+
+// ============================================================================
+// Factory Method Tests — zeros, ones, full
+// ============================================================================
+
+TEST(TensorFactory, Zeros) {
+    auto t = Tensor::zeros({2, 3, 4});
+    EXPECT_EQ(t.shape(), (std::vector<int>{2, 3, 4}));
+    EXPECT_EQ(t.num_elements(), 24);
+    for (int i = 0; i < t.num_elements(); ++i) {
+        EXPECT_FLOAT_EQ(t[i], 0.0f);
+    }
+}
+
+TEST(TensorFactory, Ones) {
+    auto t = Tensor::ones({5, 3});
+    EXPECT_EQ(t.shape(), (std::vector<int>{5, 3}));
+    for (int i = 0; i < t.num_elements(); ++i) {
+        EXPECT_FLOAT_EQ(t[i], 1.0f);
+    }
+}
+
+TEST(TensorFactory, Full) {
+    auto t = Tensor::full({2, 2}, 3.14f);
+    EXPECT_EQ(t.num_elements(), 4);
+    for (int i = 0; i < t.num_elements(); ++i) {
+        EXPECT_FLOAT_EQ(t[i], 3.14f);
+    }
+}
+
+// ============================================================================
+// Factory Method Tests — rand, randn
+// ============================================================================
+
+TEST(TensorFactory, RandShape) {
+    auto t = Tensor::rand({1, 1, 28, 28}, 42);
+    EXPECT_EQ(t.shape(), (std::vector<int>{1, 1, 28, 28}));
+    EXPECT_EQ(t.num_elements(), 784);
+}
+
+TEST(TensorFactory, RandRange) {
+    auto t = Tensor::rand({1000}, 42);
+    for (int i = 0; i < t.num_elements(); ++i) {
+        EXPECT_GE(t[i], 0.0f);
+        EXPECT_LT(t[i], 1.0f);
+    }
+}
+
+TEST(TensorFactory, RandReproducibleWithSeed) {
+    auto t1 = Tensor::rand({10}, 42);
+    auto t2 = Tensor::rand({10}, 42);
+    for (int i = 0; i < t1.num_elements(); ++i) {
+        EXPECT_FLOAT_EQ(t1[i], t2[i]);
+    }
+}
+
+TEST(TensorFactory, RandDifferentSeeds) {
+    auto t1 = Tensor::rand({100}, 1);
+    auto t2 = Tensor::rand({100}, 2);
+    // With different seeds, at least some values should differ
+    bool any_different = false;
+    for (int i = 0; i < t1.num_elements(); ++i) {
+        if (t1[i] != t2[i]) {
+            any_different = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(any_different);
+}
+
+TEST(TensorFactory, RandnShape) {
+    auto t = Tensor::randn({8, 1, 3, 3}, 0.0f, 0.1f, 42);
+    EXPECT_EQ(t.shape(), (std::vector<int>{8, 1, 3, 3}));
+    EXPECT_EQ(t.num_elements(), 72);
+}
+
+TEST(TensorFactory, RandnReproducible) {
+    auto t1 = Tensor::randn({20}, 0.0f, 1.0f, 123);
+    auto t2 = Tensor::randn({20}, 0.0f, 1.0f, 123);
+    for (int i = 0; i < t1.num_elements(); ++i) {
+        EXPECT_FLOAT_EQ(t1[i], t2[i]);
+    }
+}
+
+TEST(TensorFactory, RandnMeanStddev) {
+    // With enough samples, mean should be close to specified mean
+    auto t = Tensor::randn({10000}, 5.0f, 0.5f, 42);
+    float sum = 0.0f;
+    for (int i = 0; i < t.num_elements(); ++i) {
+        sum += t[i];
+    }
+    float mean = sum / static_cast<float>(t.num_elements());
+    EXPECT_NEAR(mean, 5.0f, 0.05f);  // Within 0.05 of target mean
+}
+
+// ============================================================================
+// Reshape Tests
+// ============================================================================
+
+TEST(TensorReshape, BasicReshape) {
+    std::vector<float> data = {1, 2, 3, 4, 5, 6};
+    Tensor t({2, 3}, data);
+    Tensor reshaped = t.reshape({3, 2});
+    EXPECT_EQ(reshaped.shape(), (std::vector<int>{3, 2}));
+    EXPECT_EQ(reshaped.num_elements(), 6);
+    // Data order is preserved
+    EXPECT_FLOAT_EQ(reshaped[0], 1.0f);
+    EXPECT_FLOAT_EQ(reshaped[5], 6.0f);
+}
+
+TEST(TensorReshape, InferDimension) {
+    Tensor t({2, 3, 4});
+    Tensor reshaped = t.reshape({-1, 4});
+    EXPECT_EQ(reshaped.shape(), (std::vector<int>{6, 4}));
+    EXPECT_EQ(reshaped.num_elements(), 24);
+}
+
+TEST(TensorReshape, InferFirstDimension) {
+    Tensor t({24});
+    Tensor reshaped = t.reshape({-1, 2, 3});
+    EXPECT_EQ(reshaped.shape(), (std::vector<int>{4, 2, 3}));
+}
+
+TEST(TensorReshape, InferLastDimension) {
+    Tensor t({2, 3, 4});
+    Tensor reshaped = t.reshape({6, -1});
+    EXPECT_EQ(reshaped.shape(), (std::vector<int>{6, 4}));
+}
+
+TEST(TensorReshape, PreservesData) {
+    std::vector<float> data = {1, 2, 3, 4, 5, 6, 7, 8};
+    Tensor t({2, 4}, data);
+    Tensor reshaped = t.reshape({4, 2});
+    for (int i = 0; i < 8; ++i) {
+        EXPECT_FLOAT_EQ(reshaped[i], static_cast<float>(i + 1));
+    }
+}
+
+TEST(TensorReshape, SameShape) {
+    Tensor t({2, 3});
+    Tensor reshaped = t.reshape({2, 3});
+    EXPECT_EQ(reshaped.shape(), t.shape());
+}
+
+TEST(TensorReshape, MultipleNegOneThrows) {
+    Tensor t({24});
+    EXPECT_THROW(t.reshape({-1, -1, 4}), std::invalid_argument);
+}
+
+TEST(TensorReshape, MismatchedElementCountThrows) {
+    Tensor t({2, 3});
+    EXPECT_THROW(t.reshape({2, 4}), std::invalid_argument);
+}
+
+TEST(TensorReshape, ZeroDimensionThrows) {
+    Tensor t({6});
+    EXPECT_THROW(t.reshape({0, 6}), std::invalid_argument);
+}
+
+TEST(TensorReshape, IndivisibleInferThrows) {
+    Tensor t({7});
+    EXPECT_THROW(t.reshape({-1, 3}), std::invalid_argument);
+}
+
+TEST(TensorReshape, DoesNotModifyOriginal) {
+    Tensor original({2, 3});
+    original[0] = 42.0f;
+    Tensor reshaped = original.reshape({3, 2});
+    reshaped[0] = 99.0f;
+    // Original should be unchanged (reshape copies data)
+    EXPECT_FLOAT_EQ(original[0], 42.0f);
+}
+
+// ============================================================================
+// Flatten Tests
+// ============================================================================
+
+TEST(TensorFlatten, NCHW) {
+    Tensor t({2, 8, 14, 14});
+    Tensor flat = t.flatten();
+    EXPECT_EQ(flat.shape(), (std::vector<int>{2, 8 * 14 * 14}));
+    EXPECT_EQ(flat.num_elements(), t.num_elements());
+}
+
+TEST(TensorFlatten, ThreeDimensional) {
+    Tensor t({3, 4, 5});
+    Tensor flat = t.flatten();
+    EXPECT_EQ(flat.shape(), (std::vector<int>{3, 20}));
+}
+
+TEST(TensorFlatten, OneDimensional) {
+    Tensor t({10});
+    Tensor flat = t.flatten();
+    EXPECT_EQ(flat.shape(), (std::vector<int>{1, 10}));
+}
+
+TEST(TensorFlatten, FlattenAll) {
+    Tensor t({2, 3, 4});
+    Tensor flat = t.flatten_all();
+    EXPECT_EQ(flat.shape(), (std::vector<int>{24}));
+    EXPECT_EQ(flat.ndim(), 1);
+}
+
+TEST(TensorFlatten, PreservesData) {
+    std::vector<float> data = {1, 2, 3, 4, 5, 6};
+    Tensor t({1, 2, 3}, data);
+    Tensor flat = t.flatten();
+    for (int i = 0; i < 6; ++i) {
+        EXPECT_FLOAT_EQ(flat[i], static_cast<float>(i + 1));
+    }
+}
