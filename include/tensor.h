@@ -82,6 +82,26 @@ public:
     void zero() { fill(0.0f); }
 
     // ========================================================================
+    // Comparison
+    // ========================================================================
+
+    /// Check if two tensors are element-wise equal within a tolerance.
+    /// Uses the formula: |a - b| <= atol + rtol * |b|
+    /// This is the primary method for validating GPU kernel outputs
+    /// against CPU reference implementations.
+    /// Returns true if shapes match AND all elements are within tolerance.
+    bool allclose(const Tensor& other, float atol = 1e-5f, float rtol = 1e-5f) const;
+
+    /// Returns the maximum absolute difference between two tensors.
+    /// Useful for debugging when allclose fails.
+    /// Returns -1.0f if shapes don't match.
+    float max_diff(const Tensor& other) const;
+
+    /// Exact equality: same shape and identical data (no tolerance).
+    bool operator==(const Tensor& other) const;
+    bool operator!=(const Tensor& other) const { return !(*this == other); }
+
+    // ========================================================================
     // Data access
     // ========================================================================
 

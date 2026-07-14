@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iomanip>
 #include <numeric>
 #include <stdexcept>
@@ -112,6 +113,52 @@ Tensor Tensor::randn(const std::vector<int>& shape, float mean, float stddev,
         t[i] = dist(gen);
     }
     return t;
+}
+
+// ============================================================================
+// Comparison
+// ============================================================================
+
+bool Tensor::allclose(const Tensor& other, float atol, float rtol) const {
+    // Shapes must match
+    if (shape_ != other.shape_) {
+        return false;
+    }
+
+    // Element-wise check: |a - b| <= atol + rtol * |b|
+    for (int i = 0; i < num_elements(); ++i) {
+        float a = data_[static_cast<size_t>(i)];
+        float b = other.data_[static_cast<size_t>(i)];
+        float diff = std::fabs(a - b);
+        float tol = atol + rtol * std::fabs(b);
+        if (diff > tol) {
+            return false;
+        }
+    }
+    return true;
+}
+
+float Tensor::max_diff(const Tensor& other) const {
+    if (shape_ != other.shape_) {
+        return -1.0f;
+    }
+
+    float max_d = 0.0f;
+    for (int i = 0; i < num_elements(); ++i) {
+        float diff = std::fabs(data_[static_cast<size_t>(i)] -
+                               other.data_[static_cast<size_t>(i)]);
+        if (diff > max_d) {
+            max_d = diff;
+        }
+    }
+    return max_d;
+}
+
+bool Tensor::operator==(const Tensor& other) const {
+    if (shape_ != other.shape_) {
+        return false;
+    }
+    return data_ == other.data_;
 }
 
 // ============================================================================

@@ -522,3 +522,118 @@ TEST(TensorFlatten, PreservesData) {
         EXPECT_FLOAT_EQ(flat[i], static_cast<float>(i + 1));
     }
 }
+
+// ============================================================================
+// Allclose Tests
+// ============================================================================
+
+TEST(TensorAllclose, IdenticalTensors) {
+    auto t1 = Tensor::ones({3, 4});
+    auto t2 = Tensor::ones({3, 4});
+    EXPECT_TRUE(t1.allclose(t2));
+}
+
+TEST(TensorAllclose, WithinTolerance) {
+    std::vector<float> data1 = {1.0f, 2.0f, 3.0f};
+    std::vector<float> data2 = {1.000001f, 2.000001f, 3.000001f};
+    Tensor t1({3}, data1);
+    Tensor t2({3}, data2);
+    EXPECT_TRUE(t1.allclose(t2, 1e-5f));
+}
+
+TEST(TensorAllclose, OutsideTolerance) {
+    std::vector<float> data1 = {1.0f, 2.0f, 3.0f};
+    std::vector<float> data2 = {1.0f, 2.0f, 3.1f};
+    Tensor t1({3}, data1);
+    Tensor t2({3}, data2);
+    EXPECT_FALSE(t1.allclose(t2, 1e-5f));
+}
+
+TEST(TensorAllclose, ShapeMismatch) {
+    auto t1 = Tensor::ones({2, 3});
+    auto t2 = Tensor::ones({3, 2});
+    EXPECT_FALSE(t1.allclose(t2));
+}
+
+TEST(TensorAllclose, CustomAtol) {
+    std::vector<float> data1 = {1.0f, 2.0f};
+    std::vector<float> data2 = {1.05f, 2.05f};
+    Tensor t1({2}, data1);
+    Tensor t2({2}, data2);
+    EXPECT_FALSE(t1.allclose(t2, 0.01f));   // Too tight
+    EXPECT_TRUE(t1.allclose(t2, 0.1f));     // Relaxed enough
+}
+
+TEST(TensorAllclose, RelativeTolerance) {
+    // For large values, rtol matters more
+    std::vector<float> data1 = {1000.0f};
+    std::vector<float> data2 = {1000.01f};
+    Tensor t1({1}, data1);
+    Tensor t2({1}, data2);
+    // atol=0 but rtol=1e-4 → tol = 0 + 1e-4 * 1000.01 = 0.100001
+    EXPECT_TRUE(t1.allclose(t2, 0.0f, 1e-4f));
+}
+
+TEST(TensorAllclose, ZeroTensors) {
+    auto t1 = Tensor::zeros({100});
+    auto t2 = Tensor::zeros({100});
+    EXPECT_TRUE(t1.allclose(t2));
+}
+
+TEST(TensorAllclose, Symmetric) {
+    std::vector<float> data1 = {1.0f, 2.0f, 3.0f};
+    std::vector<float> data2 = {1.001f, 2.001f, 3.001f};
+    Tensor t1({3}, data1);
+    Tensor t2({3}, data2);
+    // allclose should give same result in both directions
+    EXPECT_EQ(t1.allclose(t2, 0.01f), t2.allclose(t1, 0.01f));
+}
+
+// ============================================================================
+// MaxDiff Tests
+// ============================================================================
+
+TEST(TensorMaxDiff, IdenticalTensors) {
+    auto t1 = Tensor::ones({3, 4});
+    auto t2 = Tensor::ones({3, 4});
+    EXPECT_FLOAT_EQ(t1.max_diff(t2), 0.0f);
+}
+
+TEST(TensorMaxDiff, KnownDifference) {
+    std::vector<float> data1 = {1.0f, 2.0f, 3.0f};
+    std::vector<float> data2 = {1.0f, 2.5f, 3.0f};
+    Tensor t1({3}, data1);
+    Tensor t2({3}, data2);
+    EXPECT_FLOAT_EQ(t1.max_diff(t2), 0.5f);
+}
+
+TEST(TensorMaxDiff, ShapeMismatchReturnsNegative) {
+    auto t1 = Tensor::ones({2, 3});
+    auto t2 = Tensor::ones({3, 2});
+    EXPECT_FLOAT_EQ(t1.max_diff(t2), -1.0f);
+}
+
+// ============================================================================
+// Equality Operator Tests
+// ============================================================================
+
+TEST(TensorEquality, EqualTensors) {
+    std::vector<float> data = {1, 2, 3, 4};
+    Tensor t1({2, 2}, data);
+    Tensor t2({2, 2}, data);
+    EXPECT_TRUE(t1 == t2);
+    EXPECT_FALSE(t1 != t2);
+}
+
+TEST(TensorEquality, DifferentData) {
+    Tensor t1 = Tensor::ones({3});
+    Tensor t2 = Tensor::zeros({3});
+    EXPECT_FALSE(t1 == t2);
+    EXPECT_TRUE(t1 != t2);
+}
+
+TEST(TensorEquality, DifferentShape) {
+    Tensor t1 = Tensor::zeros({2, 3});
+    Tensor t2 = Tensor::zeros({3, 2});
+    EXPECT_FALSE(t1 == t2);
+}
