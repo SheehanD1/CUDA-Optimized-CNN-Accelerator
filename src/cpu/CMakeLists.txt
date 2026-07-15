@@ -12,7 +12,7 @@ add_library(cnn_cpu_layers STATIC)
 target_sources(cnn_cpu_layers
     PRIVATE
         tensor.cpp
-        # conv2d_cpu.cpp     (Commit 15)
+        conv2d_cpu.cpp
         # relu_cpu.cpp       (Commit 19)
         # maxpool_cpu.cpp    (Commit 21)
         # dense_cpu.cpp      (Commit 23)
