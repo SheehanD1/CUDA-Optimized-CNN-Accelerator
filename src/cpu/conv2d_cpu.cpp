@@ -117,4 +117,88 @@ Tensor conv2d_forward(const Tensor& input, const Tensor& kernel, const Tensor& b
     return output;
 }
 
+// ============================================================================
+// Padding Utilities
+// ============================================================================
+
+Tensor pad_tensor(const Tensor& input, int padding) {
+    if (padding == 0) {
+        return input;  // No-op: return copy
+    }
+
+    if (input.ndim() != 4) {
+        throw std::invalid_argument(
+            "pad_tensor: input must be 4D (N, C, H, W), got " +
+            std::to_string(input.ndim()) + "D");
+    }
+
+    if (padding < 0) {
+        throw std::invalid_argument(
+            "pad_tensor: padding must be non-negative, got " + std::to_string(padding));
+    }
+
+    int n = input.dim(0);
+    int c = input.dim(1);
+    int h = input.dim(2);
+    int w = input.dim(3);
+
+    int padded_h = h + 2 * padding;
+    int padded_w = w + 2 * padding;
+
+    // Allocate zero-initialized padded tensor
+    Tensor padded({n, c, padded_h, padded_w});
+
+    // Copy input data into the center of the padded tensor
+    for (int ni = 0; ni < n; ++ni) {
+        for (int ci = 0; ci < c; ++ci) {
+            for (int hi = 0; hi < h; ++hi) {
+                for (int wi = 0; wi < w; ++wi) {
+                    padded.at(ni, ci, hi + padding, wi + padding) =
+                        input.at(ni, ci, hi, wi);
+                }
+            }
+        }
+    }
+
+    return padded;
+}
+
+int compute_same_padding(int kernel_size) {
+    if (kernel_size <= 0) {
+        throw std::invalid_argument(
+            "compute_same_padding: kernel_size must be positive, got " +
+            std::to_string(kernel_size));
+    }
+
+    if (kernel_size % 2 == 0) {
+        throw std::invalid_argument(
+            "compute_same_padding: only odd kernel sizes are supported for "
+            "symmetric 'same' padding, got " + std::to_string(kernel_size));
+    }
+
+    return (kernel_size - 1) / 2;
+}
+
+// ============================================================================
+// String-based padding mode overload
+// ============================================================================
+
+Tensor conv2d_forward(const Tensor& input, const Tensor& kernel, const Tensor& bias,
+                      int stride, const std::string& padding_mode) {
+    int padding = 0;
+
+    if (padding_mode == "valid") {
+        padding = 0;
+    } else if (padding_mode == "same") {
+        // Use kernel height for padding calculation (assumes square kernels)
+        padding = compute_same_padding(kernel.dim(2));
+    } else {
+        throw std::invalid_argument(
+            "conv2d_forward: unknown padding mode '" + padding_mode +
+            "'. Supported: 'valid', 'same'");
+    }
+
+    return conv2d_forward(input, kernel, bias, stride, padding);
+}
+
 }  // namespace cnn
