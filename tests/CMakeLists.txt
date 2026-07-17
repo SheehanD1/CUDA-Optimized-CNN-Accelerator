@@ -14,11 +14,11 @@ target_link_libraries(test_tensor PRIVATE
 )
 gtest_discover_tests(test_tensor)
 
-# --- Layer tests (added as layers are implemented) ---
-# add_executable(test_conv2d test_conv2d.cpp)
-# target_link_libraries(test_conv2d PRIVATE GTest::gtest_main cnn_cpu_layers)
-# gtest_discover_tests(test_conv2d)
-#
+# --- Conv2D tests ---
+add_executable(test_conv2d test_conv2d.cpp)
+target_link_libraries(test_conv2d PRIVATE GTest::gtest_main cnn_cpu_layers)
+gtest_discover_tests(test_conv2d)
+
 # add_executable(test_relu test_relu.cpp)
 # target_link_libraries(test_relu PRIVATE GTest::gtest_main cnn_cpu_layers)
 # gtest_discover_tests(test_relu)
