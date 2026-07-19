@@ -13,7 +13,7 @@ target_sources(cnn_cpu_layers
     PRIVATE
         tensor.cpp
         conv2d_cpu.cpp
-        # relu_cpu.cpp       (Commit 19)
+        relu_cpu.cpp
         # maxpool_cpu.cpp    (Commit 21)
         # dense_cpu.cpp      (Commit 23)
         # softmax_cpu.cpp    (Commit 26)
