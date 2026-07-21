@@ -14,7 +14,7 @@ target_sources(cnn_cpu_layers
         tensor.cpp
         conv2d_cpu.cpp
         relu_cpu.cpp
-        # maxpool_cpu.cpp    (Commit 21)
+        maxpool_cpu.cpp
         # dense_cpu.cpp      (Commit 23)
         # softmax_cpu.cpp    (Commit 26)
         # inference_cpu.cpp  (Commit 30)
