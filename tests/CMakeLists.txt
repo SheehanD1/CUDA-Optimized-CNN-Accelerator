@@ -24,10 +24,11 @@ add_executable(test_relu test_relu.cpp)
 target_link_libraries(test_relu PRIVATE GTest::gtest_main cnn_cpu_layers)
 gtest_discover_tests(test_relu)
 
-# add_executable(test_maxpool test_maxpool.cpp)
-# target_link_libraries(test_maxpool PRIVATE GTest::gtest_main cnn_cpu_layers)
-# gtest_discover_tests(test_maxpool)
-#
+# --- MaxPool2D tests ---
+add_executable(test_maxpool test_maxpool.cpp)
+target_link_libraries(test_maxpool PRIVATE GTest::gtest_main cnn_cpu_layers)
+gtest_discover_tests(test_maxpool)
+
 # add_executable(test_dense test_dense.cpp)
 # target_link_libraries(test_dense PRIVATE GTest::gtest_main cnn_cpu_layers)
 # gtest_discover_tests(test_dense)
