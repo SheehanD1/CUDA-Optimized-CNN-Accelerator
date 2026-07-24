@@ -16,6 +16,7 @@ target_sources(cnn_cpu_layers
         relu_cpu.cpp
         maxpool_cpu.cpp
         dense_cpu.cpp
+        flatten_cpu.cpp
         # softmax_cpu.cpp    (Commit 26)
         # inference_cpu.cpp  (Commit 30)
         # data_loader.cpp    (Commit 32)
