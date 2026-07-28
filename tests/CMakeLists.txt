@@ -34,6 +34,7 @@ add_executable(test_dense test_dense.cpp)
 target_link_libraries(test_dense PRIVATE GTest::gtest_main cnn_cpu_layers)
 gtest_discover_tests(test_dense)
 
-# add_executable(test_softmax test_softmax.cpp)
-# target_link_libraries(test_softmax PRIVATE GTest::gtest_main cnn_cpu_layers)
-# gtest_discover_tests(test_softmax)
+# --- Softmax tests ---
+add_executable(test_softmax test_softmax.cpp)
+target_link_libraries(test_softmax PRIVATE GTest::gtest_main cnn_cpu_layers)
+gtest_discover_tests(test_softmax)
