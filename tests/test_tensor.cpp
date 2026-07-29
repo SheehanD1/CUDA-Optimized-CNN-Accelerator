@@ -637,3 +637,84 @@ TEST(TensorEquality, DifferentShape) {
     Tensor t2 = Tensor::zeros({3, 2});
     EXPECT_FALSE(t1 == t2);
 }
+
+// ============================================================================
+// Argmax Tests
+// ============================================================================
+
+TEST(TensorArgmax, Simple) {
+    Tensor t({5}, {1.0f, 3.0f, 2.0f, 5.0f, 4.0f});
+    EXPECT_EQ(t.argmax(), 3);
+}
+
+TEST(TensorArgmax, FirstElement) {
+    Tensor t({3}, {10.0f, 5.0f, 1.0f});
+    EXPECT_EQ(t.argmax(), 0);
+}
+
+TEST(TensorArgmax, LastElement) {
+    Tensor t({3}, {1.0f, 5.0f, 10.0f});
+    EXPECT_EQ(t.argmax(), 2);
+}
+
+TEST(TensorArgmax, AllNegative) {
+    Tensor t({4}, {-5.0f, -1.0f, -3.0f, -2.0f});
+    EXPECT_EQ(t.argmax(), 1);  // -1 is the largest
+}
+
+TEST(TensorArgmax, SingleElement) {
+    Tensor t({1}, {42.0f});
+    EXPECT_EQ(t.argmax(), 0);
+}
+
+// ============================================================================
+// MaxValue Tests
+// ============================================================================
+
+TEST(TensorMaxValue, Simple) {
+    Tensor t({5}, {1.0f, 3.0f, 2.0f, 5.0f, 4.0f});
+    EXPECT_FLOAT_EQ(t.max_value(), 5.0f);
+}
+
+TEST(TensorMaxValue, AllNegative) {
+    Tensor t({3}, {-10.0f, -5.0f, -1.0f});
+    EXPECT_FLOAT_EQ(t.max_value(), -1.0f);
+}
+
+// ============================================================================
+// ArgmaxPerRow Tests
+// ============================================================================
+
+TEST(TensorArgmaxPerRow, SingleRow) {
+    Tensor t({1, 4}, {0.1f, 0.7f, 0.1f, 0.1f});
+    auto result = t.argmax_per_row();
+    EXPECT_EQ(result.size(), 1u);
+    EXPECT_EQ(result[0], 1);
+}
+
+TEST(TensorArgmaxPerRow, BatchOf3) {
+    // 3 samples, 4 classes each
+    Tensor t({3, 4}, {
+        0.1f, 0.7f, 0.1f, 0.1f,  // max at index 1
+        0.5f, 0.1f, 0.3f, 0.1f,  // max at index 0
+        0.1f, 0.1f, 0.1f, 0.7f   // max at index 3
+    });
+    auto result = t.argmax_per_row();
+    EXPECT_EQ(result.size(), 3u);
+    EXPECT_EQ(result[0], 1);
+    EXPECT_EQ(result[1], 0);
+    EXPECT_EQ(result[2], 3);
+}
+
+TEST(TensorArgmaxPerRow, TenClasses) {
+    // Simulate softmax output for MNIST: class 7 has highest prob
+    Tensor t({1, 10}, {0.01f, 0.01f, 0.02f, 0.01f, 0.01f,
+                        0.01f, 0.02f, 0.85f, 0.03f, 0.03f});
+    auto result = t.argmax_per_row();
+    EXPECT_EQ(result[0], 7);
+}
+
+TEST(TensorArgmaxPerRow, NonTwoDimThrows) {
+    Tensor t({2, 3, 4});
+    EXPECT_THROW(t.argmax_per_row(), std::invalid_argument);
+}

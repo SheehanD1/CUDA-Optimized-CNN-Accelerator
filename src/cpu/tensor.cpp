@@ -162,6 +162,66 @@ bool Tensor::operator==(const Tensor& other) const {
 }
 
 // ============================================================================
+// Reductions
+// ============================================================================
+
+int Tensor::argmax() const {
+    if (num_elements() == 0) {
+        throw std::runtime_error("argmax: tensor is empty");
+    }
+
+    int max_idx = 0;
+    float max_val = data_[0];
+    for (int i = 1; i < num_elements(); ++i) {
+        if (data_[static_cast<size_t>(i)] > max_val) {
+            max_val = data_[static_cast<size_t>(i)];
+            max_idx = i;
+        }
+    }
+    return max_idx;
+}
+
+float Tensor::max_value() const {
+    if (num_elements() == 0) {
+        throw std::runtime_error("max_value: tensor is empty");
+    }
+
+    float max_val = data_[0];
+    for (int i = 1; i < num_elements(); ++i) {
+        if (data_[static_cast<size_t>(i)] > max_val) {
+            max_val = data_[static_cast<size_t>(i)];
+        }
+    }
+    return max_val;
+}
+
+std::vector<int> Tensor::argmax_per_row() const {
+    if (ndim() != 2) {
+        throw std::invalid_argument(
+            "argmax_per_row: tensor must be 2D (N, D), got " +
+            std::to_string(ndim()) + "D");
+    }
+
+    int rows = dim(0);
+    int cols = dim(1);
+    std::vector<int> result(static_cast<size_t>(rows));
+
+    for (int n = 0; n < rows; ++n) {
+        int max_idx = 0;
+        float max_val = at(n, 0);
+        for (int j = 1; j < cols; ++j) {
+            if (at(n, j) > max_val) {
+                max_val = at(n, j);
+                max_idx = j;
+            }
+        }
+        result[static_cast<size_t>(n)] = max_idx;
+    }
+
+    return result;
+}
+
+// ============================================================================
 // Data access
 // ============================================================================
 

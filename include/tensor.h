@@ -102,6 +102,23 @@ public:
     bool operator!=(const Tensor& other) const { return !(*this == other); }
 
     // ========================================================================
+    // Reductions
+    // ========================================================================
+
+    /// Returns the flat index of the maximum element.
+    /// For a 1D tensor, this is the element index.
+    /// For multi-dimensional tensors, this is the flat (row-major) index.
+    int argmax() const;
+
+    /// Returns the maximum value in the tensor.
+    float max_value() const;
+
+    /// Returns the argmax along the last dimension for each row.
+    /// Input shape: (N, D) → Output: vector of N indices, each in [0, D).
+    /// Used to get predicted class from softmax output.
+    std::vector<int> argmax_per_row() const;
+
+    // ========================================================================
     // Data access
     // ========================================================================
 
