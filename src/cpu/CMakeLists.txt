@@ -19,7 +19,7 @@ target_sources(cnn_cpu_layers
         flatten_cpu.cpp
         softmax_cpu.cpp
         model.cpp
-        # inference_cpu.cpp  (Commit 30)
+        inference_cpu.cpp
         # data_loader.cpp    (Commit 32)
 )
 
