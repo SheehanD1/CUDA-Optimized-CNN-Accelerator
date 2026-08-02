@@ -38,3 +38,8 @@ gtest_discover_tests(test_dense)
 add_executable(test_softmax test_softmax.cpp)
 target_link_libraries(test_softmax PRIVATE GTest::gtest_main cnn_cpu_layers)
 gtest_discover_tests(test_softmax)
+
+# --- Model tests (construction, Xavier init, save/load, pipeline smoke) ---
+add_executable(test_model test_model.cpp)
+target_link_libraries(test_model PRIVATE GTest::gtest_main cnn_cpu_layers)
+gtest_discover_tests(test_model)
