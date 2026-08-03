@@ -20,7 +20,7 @@ target_sources(cnn_cpu_layers
         softmax_cpu.cpp
         model.cpp
         inference_cpu.cpp
-        # data_loader.cpp    (Commit 32)
+        data_loader.cpp
 )
 
 target_include_directories(cnn_cpu_layers
