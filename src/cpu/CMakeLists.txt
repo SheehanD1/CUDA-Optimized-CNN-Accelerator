@@ -37,6 +37,6 @@ else()
     target_compile_options(cnn_cpu_layers PRIVATE ${CNN_CXX_WARNING_FLAGS})
 endif()
 
-# CPU inference executable (Commit 33)
-# add_executable(cnn_cpu main_cpu.cpp)
-# target_link_libraries(cnn_cpu PRIVATE cnn_cpu_layers)
+# CPU inference executable
+add_executable(cnn_cpu main_cpu.cpp)
+target_link_libraries(cnn_cpu PRIVATE cnn_cpu_layers)
