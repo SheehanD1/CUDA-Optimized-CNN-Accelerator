@@ -43,3 +43,10 @@ gtest_discover_tests(test_softmax)
 add_executable(test_model test_model.cpp)
 target_link_libraries(test_model PRIVATE GTest::gtest_main cnn_cpu_layers)
 gtest_discover_tests(test_model)
+
+# --- End-to-end pipeline integration tests ---
+add_executable(test_pipeline test_pipeline.cpp)
+target_link_libraries(test_pipeline PRIVATE GTest::gtest_main cnn_cpu_layers)
+gtest_discover_tests(test_pipeline
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
