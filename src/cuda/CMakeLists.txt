@@ -10,8 +10,8 @@ add_library(cnn_cuda_kernels STATIC)
 
 target_sources(cnn_cuda_kernels
     PRIVATE
-        # CUDA infrastructure (Commits 35-41)
-        # memory.cu            (Commit 36)
+        # CUDA infrastructure
+        memory.cu
         # device_info.cu       (Commit 40)
         #
         # Naive kernels (Commits 42-52)
@@ -26,7 +26,6 @@ target_sources(cnn_cuda_kernels
         #
         # GPU pipeline (Commit 53)
         # inference_gpu.cu     (Commit 53)
-        ${CMAKE_CURRENT_SOURCE_DIR}/.gitkeep   # Placeholder until sources are added
 )
 
 target_include_directories(cnn_cuda_kernels
