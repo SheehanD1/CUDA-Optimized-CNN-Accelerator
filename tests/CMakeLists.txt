@@ -50,3 +50,8 @@ target_link_libraries(test_pipeline PRIVATE GTest::gtest_main cnn_cpu_layers)
 gtest_discover_tests(test_pipeline
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
+
+# --- GPU tensor round-trip and RAII tests ---
+add_executable(test_gpu_tensor test_gpu_tensor.cpp)
+target_link_libraries(test_gpu_tensor PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_gpu_tensor)
