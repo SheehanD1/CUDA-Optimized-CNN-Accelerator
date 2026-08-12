@@ -13,6 +13,7 @@ target_sources(cnn_cuda_kernels
         # CUDA infrastructure
         memory.cu
         gpu_tensor.cu
+        cuda_timer.cu
         # device_info.cu       (Commit 40)
         #
         # Naive kernels (Commits 42-52)
