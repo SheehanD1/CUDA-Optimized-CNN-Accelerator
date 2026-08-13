@@ -14,7 +14,7 @@ target_sources(cnn_cuda_kernels
         memory.cu
         gpu_tensor.cu
         cuda_timer.cu
-        # device_info.cu       (Commit 40)
+        device_info.cu
         #
         # Naive kernels (Commits 42-52)
         # conv2d_kernel.cu     (Commit 42)
