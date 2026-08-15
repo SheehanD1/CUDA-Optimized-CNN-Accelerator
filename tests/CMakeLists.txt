@@ -55,3 +55,8 @@ gtest_discover_tests(test_pipeline
 add_executable(test_gpu_tensor test_gpu_tensor.cpp)
 target_link_libraries(test_gpu_tensor PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_gpu_tensor)
+
+# --- GPU RAII and move semantics stress tests ---
+add_executable(test_gpu_raii test_gpu_raii.cpp)
+target_link_libraries(test_gpu_raii PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_gpu_raii)
