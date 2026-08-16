@@ -16,8 +16,8 @@ target_sources(cnn_cuda_kernels
         cuda_timer.cu
         device_info.cu
         #
-        # Naive kernels (Commits 42-52)
-        # conv2d_kernel.cu     (Commit 42)
+        # Naive kernels
+        conv2d_kernel.cu
         # relu_kernel.cu       (Commit 45)
         # maxpool_kernel.cu    (Commit 47)
         # dense_kernel.cu      (Commit 49)
