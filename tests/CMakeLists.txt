@@ -60,3 +60,8 @@ gtest_discover_tests(test_gpu_tensor)
 add_executable(test_gpu_raii test_gpu_raii.cpp)
 target_link_libraries(test_gpu_raii PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_gpu_raii)
+
+# --- Conv2D GPU vs CPU validation tests ---
+add_executable(test_conv2d_gpu test_conv2d_gpu.cpp)
+target_link_libraries(test_conv2d_gpu PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_conv2d_gpu)
