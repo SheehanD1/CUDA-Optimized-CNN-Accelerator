@@ -1,3 +1,4 @@
+#include "kernels.h"
 #include "cuda_utils.h"
 #include "gpu_tensor.h"
 
