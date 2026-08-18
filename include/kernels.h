@@ -33,10 +33,13 @@ GpuTensor conv2d_gpu(const GpuTensor& input, const GpuTensor& weights,
                       const GpuTensor& bias, int stride, int padding);
 
 // ============================================================================
-// ReLU (Commit 45)
+// ReLU
 // ============================================================================
 
-// GpuTensor relu_gpu(const GpuTensor& input);
+/// GPU ReLU activation: element-wise max(0, x).
+/// @param input Any-shape tensor on GPU
+/// @return Output tensor with same shape on GPU
+GpuTensor relu_gpu(const GpuTensor& input);
 
 // ============================================================================
 // MaxPool2D (Commit 47)
