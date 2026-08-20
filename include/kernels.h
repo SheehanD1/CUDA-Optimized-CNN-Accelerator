@@ -42,10 +42,15 @@ GpuTensor conv2d_gpu(const GpuTensor& input, const GpuTensor& weights,
 GpuTensor relu_gpu(const GpuTensor& input);
 
 // ============================================================================
-// MaxPool2D (Commit 47)
+// MaxPool2D
 // ============================================================================
 
-// GpuTensor maxpool2d_gpu(const GpuTensor& input, int pool_size, int stride = 0);
+/// GPU MaxPool2D: downsample by taking max in pool_size×pool_size windows.
+/// @param input   Input tensor (N, C, H, W) on GPU
+/// @param pool_size Pooling window size (e.g., 2)
+/// @param stride  Stride (default: pool_size for non-overlapping)
+/// @return Output tensor (N, C, H/stride, W/stride) on GPU
+GpuTensor maxpool2d_gpu(const GpuTensor& input, int pool_size, int stride = 0);
 
 // ============================================================================
 // Dense (Commit 49)
