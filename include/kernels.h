@@ -53,11 +53,16 @@ GpuTensor relu_gpu(const GpuTensor& input);
 GpuTensor maxpool2d_gpu(const GpuTensor& input, int pool_size, int stride = 0);
 
 // ============================================================================
-// Dense (Commit 49)
+// Dense
 // ============================================================================
 
-// GpuTensor dense_gpu(const GpuTensor& input, const GpuTensor& weights,
-//                     const GpuTensor& bias);
+/// GPU Dense (fully connected) forward pass: output = input * weights^T + bias.
+/// @param input   Input tensor (N, in_features) on GPU
+/// @param weights Weight matrix (out_features, in_features) on GPU
+/// @param bias    Bias vector (out_features) on GPU
+/// @return Output tensor (N, out_features) on GPU
+GpuTensor dense_gpu(const GpuTensor& input, const GpuTensor& weights,
+                     const GpuTensor& bias);
 
 // ============================================================================
 // Softmax (Commit 51)
