@@ -75,3 +75,8 @@ gtest_discover_tests(test_relu_gpu)
 add_executable(test_maxpool_gpu test_maxpool_gpu.cpp)
 target_link_libraries(test_maxpool_gpu PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_maxpool_gpu)
+
+# --- Dense GPU vs CPU validation tests ---
+add_executable(test_dense_gpu test_dense_gpu.cpp)
+target_link_libraries(test_dense_gpu PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_dense_gpu)
