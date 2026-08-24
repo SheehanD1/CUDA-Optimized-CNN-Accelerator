@@ -21,7 +21,7 @@ target_sources(cnn_cuda_kernels
         relu_kernel.cu
         maxpool_kernel.cu
         dense_kernel.cu
-        # softmax_kernel.cu    (Commit 51)
+        softmax_kernel.cu
         #
         # Optimized kernels (Commits 57-63)
         # conv2d_tiled_kernel.cu  (Commit 57)

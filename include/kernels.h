@@ -65,7 +65,10 @@ GpuTensor dense_gpu(const GpuTensor& input, const GpuTensor& weights,
                      const GpuTensor& bias);
 
 // ============================================================================
-// Softmax (Commit 51)
+// Softmax
 // ============================================================================
 
-// GpuTensor softmax_gpu(const GpuTensor& input);
+/// GPU Softmax: numerically stable per-row softmax with shared memory reductions.
+/// @param input Input tensor (N, num_classes) on GPU
+/// @return Output tensor (N, num_classes) on GPU, each row sums to 1.0
+GpuTensor softmax_gpu(const GpuTensor& input);
