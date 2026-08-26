@@ -26,8 +26,8 @@ target_sources(cnn_cuda_kernels
         # Optimized kernels (Commits 57-63)
         # conv2d_tiled_kernel.cu  (Commit 57)
         #
-        # GPU pipeline (Commit 53)
-        # inference_gpu.cu     (Commit 53)
+        # GPU pipeline
+        inference_gpu.cu
 )
 
 target_include_directories(cnn_cuda_kernels
