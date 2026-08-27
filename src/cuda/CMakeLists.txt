@@ -52,6 +52,6 @@ target_compile_options(cnn_cuda_kernels
         >
 )
 
-# GPU inference executable (Commit 54)
-# add_executable(cnn_gpu main_gpu.cu)
-# target_link_libraries(cnn_gpu PRIVATE cnn_cuda_kernels cnn_cpu_layers)
+# GPU inference executable
+add_executable(cnn_gpu main_gpu.cu)
+target_link_libraries(cnn_gpu PRIVATE cnn_cuda_kernels cnn_cpu_layers)
