@@ -90,3 +90,8 @@ gtest_discover_tests(test_softmax_gpu)
 add_executable(test_gpu_pipeline test_gpu_pipeline.cpp)
 target_link_libraries(test_gpu_pipeline PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_gpu_pipeline)
+
+# --- CPU vs GPU timing benchmark ---
+add_executable(test_timing test_timing.cpp)
+target_link_libraries(test_timing PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_timing)
