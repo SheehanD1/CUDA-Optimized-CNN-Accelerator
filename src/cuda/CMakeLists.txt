@@ -23,8 +23,8 @@ target_sources(cnn_cuda_kernels
         dense_kernel.cu
         softmax_kernel.cu
         #
-        # Optimized kernels (Commits 57-63)
-        # conv2d_tiled_kernel.cu  (Commit 57)
+        # Optimized kernels
+        conv2d_tiled_kernel.cu
         #
         # GPU pipeline
         inference_gpu.cu

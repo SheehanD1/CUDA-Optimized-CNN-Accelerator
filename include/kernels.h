@@ -32,6 +32,21 @@
 GpuTensor conv2d_gpu(const GpuTensor& input, const GpuTensor& weights,
                       const GpuTensor& bias, int stride, int padding);
 
+/// GPU Conv2D forward pass (optimized: shared-memory tiling).
+///
+/// Uses 16×16 output tiles with cooperative input loading into shared memory.
+/// ~9× reduction in global memory reads for 3×3 kernels vs naive version.
+///
+/// @param input   Input tensor (N, C_in, H, W) on GPU
+/// @param weights Kernel weights (C_out, C_in, KH, KW) on GPU
+/// @param bias    Bias tensor (C_out) on GPU
+/// @param stride  Convolution stride
+/// @param padding Zero-padding amount
+/// @return Output tensor (N, C_out, OH, OW) on GPU
+///
+GpuTensor conv2d_tiled_gpu(const GpuTensor& input, const GpuTensor& weights,
+                            const GpuTensor& bias, int stride, int padding);
+
 // ============================================================================
 // ReLU
 // ============================================================================
