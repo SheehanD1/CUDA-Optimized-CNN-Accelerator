@@ -95,3 +95,8 @@ gtest_discover_tests(test_gpu_pipeline)
 add_executable(test_timing test_timing.cpp)
 target_link_libraries(test_timing PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_timing)
+
+# --- Tiled Conv2D correctness validation ---
+add_executable(test_conv2d_tiled test_conv2d_tiled.cpp)
+target_link_libraries(test_conv2d_tiled PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_conv2d_tiled)
