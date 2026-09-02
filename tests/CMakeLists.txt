@@ -100,3 +100,8 @@ gtest_discover_tests(test_timing)
 add_executable(test_conv2d_tiled test_conv2d_tiled.cpp)
 target_link_libraries(test_conv2d_tiled PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_conv2d_tiled)
+
+# --- Naive vs tiled Conv2D performance comparison ---
+add_executable(test_conv2d_perf test_conv2d_perf.cpp)
+target_link_libraries(test_conv2d_perf PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_conv2d_perf)
