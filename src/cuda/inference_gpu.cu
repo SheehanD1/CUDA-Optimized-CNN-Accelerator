@@ -46,7 +46,7 @@ Tensor gpu_inference(const Model& model, const Tensor& input) {
     // ReLU:   (N, 8, 28, 28)
     // Pool:   (N, 8, 14, 14)
 
-    GpuTensor x = conv2d_gpu(g_input, g_conv1_w, g_conv1_b, 1, 1);
+    GpuTensor x = conv2d_tiled_gpu(g_input, g_conv1_w, g_conv1_b, 1, 1);
     x = relu_gpu(x);
     x = maxpool2d_gpu(x, 2);
 
@@ -58,7 +58,7 @@ Tensor gpu_inference(const Model& model, const Tensor& input) {
     // ReLU:   (N, 16, 14, 14)
     // Pool:   (N, 16, 7, 7)
 
-    x = conv2d_gpu(x, g_conv2_w, g_conv2_b, 1, 1);
+    x = conv2d_tiled_gpu(x, g_conv2_w, g_conv2_b, 1, 1);
     x = relu_gpu(x);
     x = maxpool2d_gpu(x, 2);
 
