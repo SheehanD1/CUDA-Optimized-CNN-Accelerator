@@ -90,6 +90,11 @@ public:
         return static_cast<size_t>(num_elements()) * sizeof(float);
     }
 
+    /// Reshape the tensor in-place (metadata only — no data movement).
+    /// The new shape must have the same total number of elements.
+    /// This is used for flatten: (N, C, H, W) → (N, C*H*W) with zero cost.
+    void reshape(const std::vector<int>& new_shape);
+
     /// Returns true if this tensor owns valid device memory.
     bool is_valid() const { return d_data_ != nullptr; }
 

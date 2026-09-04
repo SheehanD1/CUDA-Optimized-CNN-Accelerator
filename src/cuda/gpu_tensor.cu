@@ -92,3 +92,22 @@ int GpuTensor::num_elements() const {
     if (shape_.empty()) return 0;
     return std::accumulate(shape_.begin(), shape_.end(), 1, std::multiplies<int>());
 }
+
+void GpuTensor::reshape(const std::vector<int>& new_shape) {
+    // Compute new total elements
+    int new_total = 1;
+    for (int d : new_shape) {
+        new_total *= d;
+    }
+
+    // Validate: must have same total elements
+    int old_total = num_elements();
+    if (new_total != old_total) {
+        throw std::invalid_argument(
+            "GpuTensor::reshape: new shape has " + std::to_string(new_total) +
+            " elements, but tensor has " + std::to_string(old_total));
+    }
+
+    // Just update metadata — no data movement
+    shape_ = new_shape;
+}

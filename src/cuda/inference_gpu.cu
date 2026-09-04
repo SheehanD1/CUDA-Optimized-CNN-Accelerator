@@ -65,19 +65,12 @@ Tensor gpu_inference(const Model& model, const Tensor& input) {
     // ========================================================================
     // Flatten: (N, 16, 7, 7) → (N, 784)
     // ========================================================================
-    // On GPU, flatten is just a reshape — no data movement needed.
+    // Zero-cost in-place reshape — metadata only, no data movement.
     // The underlying memory is already contiguous in row-major order.
 
     int batch_size = x.dim(0);
     int flat_size = x.num_elements() / batch_size;
-    // Create a new GpuTensor with reshaped metadata pointing to same data
-    // Since GpuTensor is move-only and owns memory, we download and re-upload
-    // with the new shape. This is a small overhead for correctness.
-    {
-        Tensor flat_cpu = x.download();
-        flat_cpu = flat_cpu.reshape({batch_size, flat_size});
-        x = GpuTensor(flat_cpu);
-    }
+    x.reshape({batch_size, flat_size});
 
     // ========================================================================
     // Dense Block: Dense1 → ReLU → Dense2
