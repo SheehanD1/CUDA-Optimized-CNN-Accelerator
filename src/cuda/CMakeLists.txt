@@ -28,6 +28,7 @@ target_sources(cnn_cuda_kernels
         #
         # GPU pipeline
         inference_gpu.cu
+        gpu_model.cu
 )
 
 target_include_directories(cnn_cuda_kernels
