@@ -24,6 +24,8 @@
 
 #include "tensor.h"
 
+#include <cuda_runtime.h>
+
 #include <vector>
 
 class GpuTensor {
@@ -58,12 +60,20 @@ public:
     // Data Transfer
     // ========================================================================
 
-    /// Upload CPU tensor data to this GPU tensor.
+    /// Upload CPU tensor data to this GPU tensor (synchronous).
     /// The CPU tensor must have the same number of elements.
     void upload(const Tensor& cpu_tensor);
 
-    /// Download GPU tensor data to a new CPU tensor.
+    /// Download GPU tensor data to a new CPU tensor (synchronous).
     Tensor download() const;
+
+    /// Upload CPU tensor data asynchronously on the given stream.
+    /// The CPU tensor data must remain valid until the transfer completes.
+    void upload_async(const Tensor& cpu_tensor, cudaStream_t stream);
+
+    /// Download GPU tensor data asynchronously on the given stream.
+    /// Call cudaStreamSynchronize before accessing the returned tensor's data.
+    Tensor download_async(cudaStream_t stream) const;
 
     // ========================================================================
     // Accessors

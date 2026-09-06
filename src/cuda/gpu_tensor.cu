@@ -84,6 +84,30 @@ Tensor GpuTensor::download() const {
     return cpu_tensor;
 }
 
+void GpuTensor::upload_async(const Tensor& cpu_tensor, cudaStream_t stream) {
+    int n = num_elements();
+    if (cpu_tensor.num_elements() != n) {
+        throw std::invalid_argument(
+            "GpuTensor::upload_async: element count mismatch");
+    }
+    if (n > 0) {
+        size_t bytes = static_cast<size_t>(n) * sizeof(float);
+        CUDA_CHECK(cudaMemcpyAsync(d_data_, cpu_tensor.data(), bytes,
+                                    cudaMemcpyHostToDevice, stream));
+    }
+}
+
+Tensor GpuTensor::download_async(cudaStream_t stream) const {
+    Tensor cpu_tensor(shape_);
+    int n = num_elements();
+    if (n > 0) {
+        size_t bytes = static_cast<size_t>(n) * sizeof(float);
+        CUDA_CHECK(cudaMemcpyAsync(cpu_tensor.data(), d_data_, bytes,
+                                    cudaMemcpyDeviceToHost, stream));
+    }
+    return cpu_tensor;
+}
+
 // ============================================================================
 // Accessors
 // ============================================================================
