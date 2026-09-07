@@ -105,3 +105,8 @@ gtest_discover_tests(test_conv2d_tiled)
 add_executable(test_conv2d_perf test_conv2d_perf.cpp)
 target_link_libraries(test_conv2d_perf PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_conv2d_perf)
+
+# --- Optimized pipeline end-to-end validation ---
+add_executable(test_optimized_pipeline test_optimized_pipeline.cpp)
+target_link_libraries(test_optimized_pipeline PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_optimized_pipeline)
