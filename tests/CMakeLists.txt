@@ -110,3 +110,8 @@ gtest_discover_tests(test_conv2d_perf)
 add_executable(test_optimized_pipeline test_optimized_pipeline.cpp)
 target_link_libraries(test_optimized_pipeline PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
 gtest_discover_tests(test_optimized_pipeline)
+
+# --- Final performance benchmark suite ---
+add_executable(test_final_benchmark test_final_benchmark.cpp)
+target_link_libraries(test_final_benchmark PRIVATE GTest::gtest_main cnn_cpu_layers cnn_cuda_kernels)
+gtest_discover_tests(test_final_benchmark)
