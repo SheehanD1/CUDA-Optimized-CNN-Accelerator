@@ -146,69 +146,85 @@ cnn-accelerator/
 │
 ├── include/                    # Public headers (shared between CPU & GPU)
 │   ├── tensor.h                # Core Tensor class (NCHW layout)
-│   ├── gpu_tensor.h            # RAII GPU memory wrapper
-│   ├── cuda_utils.h            # CUDA_CHECK macro, error handling
 │   ├── model.h                 # Model struct (weights + architecture)
-│   └── layers/                 # Layer function declarations
+│   ├── inference.h             # CPU + GPU inference function declarations
+│   ├── data_loader.h           # MNIST IDX format parser declarations
+│   ├── gpu_tensor.h            # RAII GPU memory wrapper + async transfers
+│   ├── gpu_model.h             # Cached GPU model (upload weights once)
+│   ├── gpu_memory.h            # Host/device transfer function declarations
+│   ├── kernels.h               # All GPU kernel wrapper declarations
+│   ├── cuda_utils.h            # CUDA_CHECK / KERNEL_CHECK macros
+│   ├── cuda_timer.h            # CudaTimer (cudaEvent-based profiling)
+│   ├── cuda_stream.h           # CudaStream RAII wrapper
+│   ├── device_info.h           # GPU device query declarations
+│   └── layers/                 # CPU layer function declarations
 │       ├── conv2d.h
 │       ├── relu.h
-│       ├── maxpool.h
+│       ├── maxpool2d.h
+│       ├── flatten.h
 │       ├── dense.h
 │       └── softmax.h
 │
 ├── src/
 │   ├── cpu/                    # CPU baseline (pure C++17)
 │   │   ├── tensor.cpp          # Tensor implementation
+│   │   ├── model.cpp           # Model load/save/Xavier init
+│   │   ├── data_loader.cpp     # MNIST IDX format parser
 │   │   ├── conv2d_cpu.cpp      # Naive 6-loop convolution
 │   │   ├── relu_cpu.cpp        # Element-wise ReLU
-│   │   ├── maxpool_cpu.cpp     # Sliding window max
-│   │   ├── dense_cpu.cpp       # Matrix-vector multiply
-│   │   ├── softmax_cpu.cpp     # Stable softmax
+│   │   ├── maxpool_cpu.cpp     # Sliding window max pooling
+│   │   ├── flatten_cpu.cpp     # Reshape (N,C,H,W) → (N, C*H*W)
+│   │   ├── dense_cpu.cpp       # Matrix-vector multiply + bias
+│   │   ├── softmax_cpu.cpp     # Numerically stable softmax
 │   │   ├── inference_cpu.cpp   # Full CPU inference chain
-│   │   ├── data_loader.cpp     # MNIST IDX format parser
 │   │   └── main_cpu.cpp        # CPU executable entry point
 │   │
-│   ├── cuda/                   # GPU implementation (CUDA)
-│   │   ├── memory.cu           # cudaMalloc/cudaMemcpy/cudaFree wrappers
-│   │   ├── device_info.cu      # GPU capability query
-│   │   ├── conv2d_kernel.cu    # Naive conv2d kernel
-│   │   ├── conv2d_tiled_kernel.cu  # Shared-memory tiled conv2d
-│   │   ├── relu_kernel.cu      # ReLU kernel
-│   │   ├── maxpool_kernel.cu   # MaxPool kernel
-│   │   ├── dense_kernel.cu     # Dense kernel
-│   │   ├── softmax_kernel.cu   # Softmax kernel (parallel reduction)
-│   │   ├── inference_gpu.cu    # Full GPU inference chain
-│   │   └── main_gpu.cu         # GPU executable entry point
-│   │
-│   ├── layers/                 # Shared layer interfaces (header-only)
-│   │
-│   └── benchmarks/             # Performance measurement
-│       ├── benchmark.cpp       # Timer class + benchmark harness
-│       ├── bench_cpu.cpp       # CPU inference timing
-│       ├── bench_gpu_naive.cpp # Naive GPU timing
-│       └── bench_gpu_opt.cpp   # Optimized GPU timing
+│   └── cuda/                   # GPU implementation (CUDA)
+│       ├── memory.cu           # cudaMalloc/cudaMemcpy/cudaFree wrappers
+│       ├── gpu_tensor.cu       # GpuTensor RAII + sync/async transfers
+│       ├── gpu_model.cu        # GpuModel cached inference
+│       ├── device_info.cu      # GPU capability query + printing
+│       ├── conv2d_kernel.cu    # Naive conv2d (1 thread/output)
+│       ├── conv2d_tiled_kernel.cu  # Shared-memory tiled conv2d (16×16 tiles)
+│       ├── relu_kernel.cu      # ReLU kernel (1 thread/element)
+│       ├── maxpool_kernel.cu   # MaxPool kernel (1 thread/output)
+│       ├── dense_kernel.cu     # Dense/FC kernel (1 thread/output)
+│       ├── softmax_kernel.cu   # Softmax (1 block/row, shared mem reduction)
+│       ├── inference_gpu.cu    # Full GPU inference chain
+│       └── main_gpu.cu         # GPU executable entry point
 │
-├── tests/                      # Google Test unit tests
+├── tests/                      # Google Test suites (100+ tests)
 │   ├── test_tensor.cpp         # Tensor construction, indexing, reshape
-│   ├── test_conv2d.cpp         # Conv2D correctness (CPU + GPU vs CPU)
-│   ├── test_relu.cpp           # ReLU correctness
-│   ├── test_maxpool.cpp        # MaxPool correctness
-│   ├── test_dense.cpp          # Dense correctness
-│   ├── test_softmax.cpp        # Softmax correctness + numerical stability
-│   └── test_gpu_memory.cpp     # GPU memory round-trip, RAII
+│   ├── test_model.cpp          # Model save/load/Xavier init
+│   ├── test_conv2d.cpp         # Conv2D CPU correctness
+│   ├── test_relu.cpp           # ReLU CPU correctness
+│   ├── test_maxpool.cpp        # MaxPool CPU correctness
+│   ├── test_dense.cpp          # Dense CPU correctness
+│   ├── test_softmax.cpp        # Softmax CPU correctness
+│   ├── test_pipeline.cpp       # CPU end-to-end pipeline
+│   ├── test_gpu_tensor.cpp     # GPU memory round-trip, RAII
+│   ├── test_gpu_raii.cpp       # RAII stress tests (move, exception safety)
+│   ├── test_conv2d_gpu.cpp     # Conv2D GPU vs CPU validation
+│   ├── test_relu_gpu.cpp       # ReLU GPU vs CPU validation
+│   ├── test_maxpool_gpu.cpp    # MaxPool GPU vs CPU validation
+│   ├── test_dense_gpu.cpp      # Dense GPU vs CPU validation
+│   ├── test_softmax_gpu.cpp    # Softmax GPU vs CPU validation
+│   ├── test_gpu_pipeline.cpp   # GPU pipeline vs CPU pipeline
+│   ├── test_conv2d_tiled.cpp   # Tiled vs naive vs CPU triple comparison
+│   ├── test_optimized_pipeline.cpp  # GpuModel + streams + all optimizations
+│   ├── test_timing.cpp         # CPU vs GPU timing comparison
+│   ├── test_conv2d_perf.cpp    # Naive vs tiled Conv2D benchmark
+│   └── test_final_benchmark.cpp  # Full 3-pipeline benchmark suite
 │
 ├── scripts/
-│   └── export_weights.py       # PyTorch: train model, export binary weights
-│
-├── weights/                    # Exported binary weight files
+│   ├── build.bat               # Windows build script
+│   ├── build.sh                # Linux/macOS build script
+│   └── generate_conv2d_reference.py  # NumPy reference value generator
 │
 ├── profiling/                  # Nsight profiling configs + results
 │
 └── docs/
-    ├── architecture.md         # This document
-    ├── benchmarks.md           # Performance results and analysis
-    ├── optimizations.md        # Optimization techniques documentation
-    └── profiling.md            # Nsight Compute/Systems guide
+    └── architecture.md         # This document
 ```
 
 ---
@@ -281,12 +297,29 @@ Load MNIST Image → Normalize
 
 Weights are uploaded once at initialization. Only the input tensor and final output cross the PCIe bus per inference call.
 
-### Optimized GPU Pipeline
+### Optimized GPU Pipeline (`GpuModel`)
 
-Same structure as GPU pipeline, but kernels use:
-- **Shared memory tiling** — reduces global memory reads by loading tiles into `__shared__` memory.
-- **Coalesced access patterns** — consecutive threads access consecutive memory addresses.
-- **Tuned thread blocks** — block dimensions chosen via occupancy analysis (8×8 / 16×16 / 32×32 experiments + `cudaOccupancyMaxPotentialBlockSize()`).
+```
+GpuModel gpu_model(model);             ← Weights uploaded once (~380 KB)
+
+for each input:
+    upload_async(input, stream)         ← Only input crosses PCIe
+    → conv2d_tiled_kernel (shared mem)  ← ~9× fewer global reads
+    → relu_kernel → maxpool_kernel
+    → conv2d_tiled_kernel
+    → relu_kernel → maxpool_kernel
+    → reshape (metadata only)           ← Zero-cost flatten
+    → dense_kernel → relu_kernel
+    → dense_kernel → softmax_kernel
+    download_async(output, stream)      ← Only output crosses PCIe
+```
+
+Optimizations applied:
+- **Shared memory tiling** — input tile + halo loaded cooperatively, reused ~9× per pixel.
+- **Weight caching** — model weights uploaded to GPU once in `GpuModel` constructor.
+- **In-place reshape** — `GpuTensor::reshape()` changes metadata only, no data movement.
+- **CUDA streams** — `CudaStream` RAII wrapper enables async transfers and pipelining.
+- **16×16 thread blocks** — 2D spatial tiles for output, `blockIdx.z` encodes batch × channels.
 
 ---
 
@@ -321,11 +354,14 @@ class Tensor {
     std::vector<int> shape_;     // e.g., {1, 8, 28, 28}
 
 public:
-    float& at(int n, int c, int h, int w);    // NCHW indexing
+    float& at(int n, int c, int h, int w);           // 4D NCHW indexing
+    float& at(int n, int j);                          // 2D indexing
     static Tensor zeros(std::vector<int> shape);
-    static Tensor rand(std::vector<int> shape);
+    static Tensor rand(std::vector<int> shape, unsigned seed);
     bool allclose(const Tensor& other, float atol = 1e-5f);
+    float max_diff(const Tensor& other) const;
     Tensor reshape(std::vector<int> new_shape);
+    std::vector<int> argmax_per_row() const;
     int num_elements() const;
 };
 ```
@@ -333,39 +369,65 @@ public:
 ### `GpuTensor` (Device)
 ```cpp
 class GpuTensor {
-    float* d_ptr_ = nullptr;     // Device pointer (cudaMalloc)
+    float* d_data_ = nullptr;    // Device pointer (cudaMalloc)
     std::vector<int> shape_;
 
 public:
-    GpuTensor(std::vector<int> shape);   // Allocates device memory
-    ~GpuTensor();                         // cudaFree
-    GpuTensor(GpuTensor&&);              // Move only
-    void upload(const Tensor& host_tensor);
-    Tensor download() const;
-    float* data();                        // Raw pointer for kernels
+    GpuTensor(std::vector<int> shape);       // Allocate device memory
+    GpuTensor(const Tensor& cpu_tensor);     // Upload from CPU
+    ~GpuTensor();                             // cudaFree
+    GpuTensor(GpuTensor&&) noexcept;         // Move only
+    void upload(const Tensor& t);             // Sync H→D
+    Tensor download() const;                  // Sync D→H
+    void upload_async(const Tensor& t, cudaStream_t s);   // Async
+    Tensor download_async(cudaStream_t s) const;           // Async
+    void reshape(const std::vector<int>& new_shape);       // Metadata only
+    float* data();
 };
 ```
 
-### `Model`
+### `GpuModel` (Cached Weights)
+```cpp
+class GpuModel {
+public:
+    GpuModel(const Model& model);             // Upload weights once
+    Tensor inference(const Tensor& input) const;  // Uses cached weights
+    std::vector<int> predict(const Tensor& input) const;
+
+    // 8 GpuTensor weight members (cached on device)
+    GpuTensor conv1_weights, conv1_bias;
+    GpuTensor conv2_weights, conv2_bias;
+    GpuTensor dense1_weights, dense1_bias;
+    GpuTensor dense2_weights, dense2_bias;
+};
+```
+
+### `Model` (CPU Weights)
 ```cpp
 struct Model {
-    // Conv2D #1: 1 → 8 channels, 3×3
-    Tensor conv1_weights;   // shape: {8, 1, 3, 3}
-    Tensor conv1_bias;      // shape: {8}
+    Tensor conv1_weights;   // {8, 1, 3, 3}
+    Tensor conv1_bias;      // {8}
+    Tensor conv2_weights;   // {16, 8, 3, 3}
+    Tensor conv2_bias;      // {16}
+    Tensor dense1_weights;  // {120, 784}
+    Tensor dense1_bias;     // {120}
+    Tensor dense2_weights;  // {10, 120}
+    Tensor dense2_bias;     // {10}
 
-    // Conv2D #2: 8 → 16 channels, 3×3
-    Tensor conv2_weights;   // shape: {16, 8, 3, 3}
-    Tensor conv2_bias;      // shape: {16}
-
-    // Dense #1: 784 → 120
-    Tensor fc1_weights;     // shape: {120, 784}
-    Tensor fc1_bias;        // shape: {120}
-
-    // Dense #2: 120 → 10
-    Tensor fc2_weights;     // shape: {10, 120}
-    Tensor fc2_bias;        // shape: {10}
-
-    void load_weights(const std::string& dir);
-    void initialize_random(unsigned seed);
+    void load(const std::string& path);
+    void save(const std::string& path) const;
+    void initialize_xavier(unsigned seed);
 };
 ```
+
+---
+
+## CUDA Kernel Strategies
+
+| Layer | Naive | Optimized | Key Technique |
+|-------|-------|-----------|---------------|
+| **Conv2D** | 1 thread/output, global reads | 16×16 tiles, shared memory | Cooperative loading, ~9× read reduction |
+| **ReLU** | 1 thread/element | — (already optimal) | `fmaxf(x, 0)` |
+| **MaxPool2D** | 1 thread/output | — | Window scan |
+| **Dense** | 1 thread/output | — | Dot product over in_features |
+| **Softmax** | — | 1 block/row, shared memory | Three-pass: max → exp+sum → normalize |
